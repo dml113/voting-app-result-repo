@@ -2,14 +2,17 @@ var express = require('express'),
     async = require('async'),
     { Pool } = require('pg'),
     cookieParser = require('cookie-parser'),
+    fs = require('fs'),
     app = express(),
     server = require('http').Server(app),
     io = require('socket.io')(server);
 
 var port = process.env.PORT || 4000;
 
-io.on('connection', function (socket) {
+// CA 인증서 파일을 읽어옵니다.
+var caCert = fs.readFileSync('rds-ca.pem').toString(); // 인증서 파일 경로를 맞춰주세요.
 
+io.on('connection', function (socket) {
   socket.emit('message', { text : 'Welcome!' });
 
   socket.on('subscribe', function (data) {
@@ -17,8 +20,13 @@ io.on('connection', function (socket) {
   });
 });
 
+// PostgreSQL 연결 설정
 var pool = new Pool({
-  connectionString: 'postgres://postgres:postgres@postgres.cde69tvxoswa.ap-northeast-2.rds.amazonaws.com/postgres'
+  connectionString: 'postgres://postgres:postgres@postgres.cde69tvxoswa.ap-northeast-2.rds.amazonaws.com/postgres',  // RDS 연결 URL
+  ssl: {
+    rejectUnauthorized: true,  // SSL 인증서 검증 활성화
+    ca: caCert                // CA 인증서 사용
+  }
 });
 
 async.retry(
@@ -49,7 +57,7 @@ function getVotes(client) {
       io.sockets.emit("scores", JSON.stringify(votes));
     }
 
-    setTimeout(function() {getVotes(client) }, 1000);
+    setTimeout(function() { getVotes(client) }, 1000);
   });
 }
 
