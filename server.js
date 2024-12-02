@@ -22,7 +22,7 @@ io.on('connection', function (socket) {
 
 // PostgreSQL 연결 설정
 var pool = new Pool({
-  connectionString: 'postgres://postgres:postgres@postgres.cde69tvxoswa.ap-northeast-2.rds.amazonaws.com/postgres',  // RDS 연결 URL
+  connectionString: 'postgres://postgres:postgres@test-postgres.cde69tvxoswa.ap-northeast-2.rds.amazonaws.com/postgres',  // RDS 연결 URL
   ssl: {
     rejectUnauthorized: true,  // SSL 인증서 검증 활성화
     ca: caCert                // CA 인증서 사용
